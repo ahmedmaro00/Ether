@@ -34,14 +34,13 @@ export default function Navbar() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-          scrolled
-            ? "bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-4"
-            : "bg-transparent py-6"
-        }`}
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
+          ? "bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-4"
+          : "bg-transparent py-6"
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex justify-between items-center">
-          
+
           {/* Mobile menu toggle */}
           <button
             className="md:hidden text-stone-800 hover:text-[#d4a84b] transition-colors p-2 -ml-2"
@@ -154,9 +153,8 @@ export default function Navbar() {
                   >
                     <Link
                       href={l.href}
-                      className={`text-2xl font-serif block ${
-                        pathname === l.href ? "text-[#a07828]" : "text-stone-800"
-                      }`}
+                      className={`text-2xl font-serif block ${pathname === l.href ? "text-[#a07828]" : "text-stone-800"
+                        }`}
                     >
                       {l.label}
                     </Link>

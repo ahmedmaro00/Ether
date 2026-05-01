@@ -53,7 +53,7 @@ export default function HeroAnimation() {
         {/* We use a standard img tag here to prevent Next.js from throwing hard 500 errors if the image file is missing while you are testing */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src=""
+          src="/photos/handmade-soap-almond-marble-background.jpg"
           alt="Natural Spa Products"
           className="object-cover object-center w-full h-full"
         />
