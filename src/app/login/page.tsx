@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import api from "@/lib/api";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,24 +24,16 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await api.post("/auth/login", formData);
+      const { token, user } = res.data.data;
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Something went wrong");
-      }
+      localStorage.setItem("ether_token", token);
+      localStorage.setItem("ether_user", JSON.stringify(user));
 
       router.push("/");
       router.refresh();
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -153,6 +146,12 @@ export default function LoginPage() {
                 Create an account
               </Link>
             </p>
+            <Link 
+              href="/admin/login" 
+              className="inline-block mt-4 text-[10px] uppercase tracking-widest text-stone-400 hover:text-[#a07828] transition-colors font-bold"
+            >
+              — Admin Portal —
+            </Link>
           </div>
         </div>
       </motion.div>

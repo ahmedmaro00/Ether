@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import api from "@/lib/api";
 
 const links = [
   { href: "/", label: "Home" },
@@ -23,16 +23,14 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
+
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
+        if (pathname.startsWith('/admin')) return;
+        const res = await api.get("/user/profile");
+        setUser(res.data.data);
       } catch (err) {
         setUser(null);
       }
@@ -41,7 +39,8 @@ export default function Navbar() {
   }, [pathname]);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
+    localStorage.removeItem("ether_token");
+    localStorage.removeItem("ether_user");
     setUser(null);
     router.refresh();
   };
@@ -53,6 +52,8 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => setMobileOpen(false), [pathname]);
+
+  if (pathname.startsWith('/admin')) return null;
 
   return (
     <>
@@ -131,6 +132,12 @@ export default function Navbar() {
                     <p className="text-sm font-medium text-stone-800 truncate">{user.name || 'User'}</p>
                     <p className="text-xs text-stone-500 truncate">{user.email}</p>
                   </div>
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 transition-colors font-medium border-b border-stone-100"
+                  >
+                    Your Profile
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
@@ -220,6 +227,13 @@ export default function Navbar() {
                       <p className="font-serif text-lg text-stone-800">{user.name}</p>
                       <p className="text-sm text-stone-500">{user.email}</p>
                     </div>
+                    <Link
+                      href="/profile"
+                      onClick={() => setMobileOpen(false)}
+                      className="w-full py-4 text-center border border-stone-200 text-stone-700 rounded-2xl font-medium hover:bg-stone-50 transition-colors"
+                    >
+                      Your Profile
+                    </Link>
                     <button
                       onClick={() => {
                         handleLogout();

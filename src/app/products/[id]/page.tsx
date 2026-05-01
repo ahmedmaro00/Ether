@@ -1,24 +1,64 @@
-import { products } from "@/data/products";
+"use client";
+
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, useRouter, useParams } from "next/navigation";
 import AddToCartButton from "@/components/AddToCartButton";
 import Link from "next/link";
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
+import { Loader2 } from 'lucide-react';
+import { useEffect } from "react";
 
-export function generateStaticParams() {
-  return products.map((p) => ({ id: p.id }));
-}
+export default function ProductDetailsPage() {
+  const params = useParams();
+  const id = params.id as string;
 
-export default async function ProductDetailsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const product = products.find((p) => p.id === id);
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ['product', id],
+    queryFn: async () => {
+      const res = await api.get(`/product/${id}`);
+      return res.data.data;
+    },
+    enabled: !!id,
+    retry: false,
+  });
 
-  if (!product) notFound();
+  const { data: allProducts } = useQuery({
+    queryKey: ['public-products'],
+    queryFn: async () => {
+      const res = await api.get('/product');
+      return res.data.data.products;
+    }
+  });
 
-  const related = products.filter((p) => p.id !== product.id).slice(0, 3);
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-[#faf8f5]">
+        <Loader2 className="animate-spin text-[#d4a84b]" size={40} />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-[#faf8f5]">
+        <h1 className="text-3xl font-serif text-stone-800 mb-4">Product Not Found</h1>
+        <Link href="/products" className="text-[#d4a84b] hover:underline">Return to Shop</Link>
+      </div>
+    );
+  }
+
+  const related = (allProducts || []).filter((p: any) => p._id !== product._id).slice(0, 3);
+
+  // Map backend format to component expected format for AddToCartButton
+  const cartProduct = {
+    id: product._id,
+    name: product.name,
+    price: product.price,
+    image: product.images?.[0] || "https://placehold.co/600x800/f5e6c0/a07828?text=No+Image",
+    description: product.description,
+    scent: product.category?.name || "Uncategorized"
+  };
 
   return (
     <div className="w-full min-h-screen bg-[#faf8f5] pt-28 pb-20 relative overflow-hidden">
@@ -43,13 +83,10 @@ export default async function ProductDetailsPage({
           {/* Image Gallery area */}
           <div className="w-full lg:w-1/2 lg:sticky lg:top-32">
             <div className="rounded-[3rem] aspect-[4/5] relative overflow-hidden bg-gradient-to-b from-white to-[#f5f0ea] border border-white/60 shadow-[0_20px_60px_rgba(0,0,0,0.03)] flex items-center justify-center group">
-              <Image
-                src={product.image}
+              <img
+                src={cartProduct.image}
                 alt={product.name}
-                width={800}
-                height={800}
-                priority
-                className="object-contain w-[85%] h-[85%] mix-blend-multiply drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)] transition-transform duration-[1.5s] group-hover:scale-105"
+                className="object-cover w-[85%] h-[85%] mix-blend-multiply drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)] transition-transform duration-[1.5s] group-hover:scale-105 rounded-2xl"
               />
               {/* Soft glow behind product */}
               <div className="absolute inset-0 pointer-events-none"
@@ -61,14 +98,14 @@ export default async function ProductDetailsPage({
           {/* Product Details */}
           <div className="w-full lg:w-1/2 py-4 lg:py-10">
             <span className="text-xs uppercase tracking-[0.4em] text-[#a07828] mb-4 block font-semibold">
-              Handmade · Natural
+              {product.category?.name || "Handmade · Natural"}
             </span>
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-stone-800 mb-4 leading-tight">
               {product.name}
             </h1>
-            <p className="text-stone-500 mb-8 text-lg font-light tracking-wide">{product.scent}</p>
+            <p className="text-stone-500 mb-8 text-lg font-light tracking-wide">{product.stock > 0 ? "In Stock" : "Out of Stock"}</p>
             
-            <p className="text-4xl text-stone-900 font-medium mb-10">${product.price}</p>
+            <p className="text-4xl text-stone-900 font-medium mb-10">${product.price.toFixed(2)}</p>
 
             <div className="w-full h-px bg-gradient-to-r from-stone-200 to-transparent mb-10" />
 
@@ -95,7 +132,7 @@ export default async function ProductDetailsPage({
             </div>
 
             <div className="bg-white p-2 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-stone-100">
-              <AddToCartButton product={product} />
+              <AddToCartButton product={cartProduct} />
             </div>
 
             {/* Order note */}
@@ -117,19 +154,17 @@ export default async function ProductDetailsPage({
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-              {related.map((p) => (
-                <Link key={p.id} href={`/products/${p.id}`} className="group block">
+              {related.map((p: any) => (
+                <Link key={p._id} href={`/products/${p._id}`} className="group block">
                   <div className="product-card-hover rounded-[2rem] aspect-[3/4] relative overflow-hidden mb-5 bg-white border border-stone-100">
-                    <Image
-                      src={p.image}
+                    <img
+                      src={p.images?.[0] || "https://placehold.co/600x800/f5e6c0/a07828?text=No+Image"}
                       alt={p.name}
-                      fill
-                      sizes="33vw"
-                      className="object-contain p-8 mix-blend-multiply transition-transform duration-700 group-hover:scale-110 drop-shadow-sm"
+                      className="object-cover w-full h-full p-8 mix-blend-multiply transition-transform duration-700 group-hover:scale-110 drop-shadow-sm"
                     />
                   </div>
                   <h3 className="text-lg font-serif text-stone-800 group-hover:text-[#a07828] transition-colors">{p.name}</h3>
-                  <p className="text-stone-400 text-sm font-light mt-1">${p.price}</p>
+                  <p className="text-stone-400 text-sm font-light mt-1">${p.price.toFixed(2)}</p>
                 </Link>
               ))}
             </div>

@@ -3,8 +3,10 @@
 import HeroAnimation from "@/components/HeroAnimation";
 import Link from "next/link";
 import Image from "next/image";
-import { products } from "@/data/products";
 import { motion } from "framer-motion";
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
+import { Loader2 } from 'lucide-react';
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 40 },
@@ -12,7 +14,15 @@ const fadeUpVariant = {
 };
 
 export default function Home() {
-  const featured = products.slice(0, 3);
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['public-products', 'featured'],
+    queryFn: async () => {
+      const res = await api.get('/product');
+      return res.data.data.products;
+    }
+  });
+
+  const featured = products?.slice(0, 3) || [];
 
   return (
     <div className="flex flex-col bg-[#faf8f5]">
@@ -76,43 +86,49 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-            {featured.map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Link href={`/products/${product.id}`} className="group block h-full">
-                  <div className="product-card-hover rounded-[2rem] overflow-hidden mb-6 relative aspect-[3/4] bg-gradient-to-b from-[#fdfbf7] to-[#f5f0ea] border border-stone-100">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-contain p-10 mix-blend-multiply transition-transform duration-700 group-hover:scale-110 drop-shadow-sm group-hover:drop-shadow-xl"
-                    />
-                    
-                    {/* Hover overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    
-                    {/* Quick view button hint */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-6 py-2 rounded-full text-xs font-medium tracking-wide text-stone-800 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 shadow-sm">
-                      View Details
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="animate-spin text-[#d4a84b]" size={40} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+              {featured.map((product: any, i: number) => (
+                <motion.div
+                  key={product._id}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.8, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Link href={`/products/${product._id}`} className="group block h-full">
+                    <div className="product-card-hover rounded-[2rem] overflow-hidden mb-6 relative aspect-[3/4] bg-gradient-to-b from-[#fdfbf7] to-[#f5f0ea] border border-stone-100">
+                      <div className="relative w-full h-full p-10">
+                        <img
+                          src={product.images?.[0] || "https://placehold.co/600x800/f5e6c0/a07828?text=No+Image"}
+                          alt={product.name}
+                          className="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-110 drop-shadow-sm group-hover:drop-shadow-xl"
+                        />
+                      </div>
+                      
+                      {/* Hover overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      
+                      {/* Quick view button hint */}
+                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-6 py-2 rounded-full text-xs font-medium tracking-wide text-stone-800 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 shadow-sm">
+                        View Details
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="px-2 text-center md:text-left">
-                    <h3 className="text-xl font-serif text-stone-800 mb-1 group-hover:text-[#a07828] transition-colors">{product.name}</h3>
-                    <p className="text-stone-400 text-sm mb-3 font-light">{product.scent}</p>
-                    <p className="text-stone-800 text-lg font-medium">${product.price}</p>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+                    
+                    <div className="px-2 text-center md:text-left">
+                      <h3 className="text-xl font-serif text-stone-800 mb-1 group-hover:text-[#a07828] transition-colors">{product.name}</h3>
+                      <p className="text-stone-400 text-sm mb-3 font-light">{product.category?.name || "Uncategorized"}</p>
+                      <p className="text-stone-800 text-lg font-medium">${product.price.toFixed(2)}</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           <div className="flex md:hidden justify-center mt-12">
             <Link

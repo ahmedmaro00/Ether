@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import api from "@/lib/api";
 
 type Field = "fullName" | "phone" | "instagram" | "address";
 
@@ -26,18 +27,37 @@ export default function CheckoutPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
       setError("Your cart is empty.");
       return;
     }
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
+    setError("");
+
+    try {
+      const payload = {
+        fullName: form.fullName,
+        phone: form.phone,
+        instagramUsername: form.instagram,
+        address: form.address,
+        products: items.map(item => ({
+          product: item.id,
+          quantity: item.quantity
+        })),
+        totalPrice: total
+      };
+
+      await api.post('/order', payload);
+      
       clearCart();
       router.push("/success");
-    }, 1800);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || "Something went wrong creating your order.");
+      setIsSubmitting(false);
+    }
   };
 
   if (items.length === 0 && !isSubmitting) {

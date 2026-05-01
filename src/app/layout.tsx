@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: "Handmade natural products with relaxing scents.",
 };
 
+import QueryProvider from "@/components/providers/query-provider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,13 +25,15 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-stone-50 text-stone-900 flex flex-col min-h-screen`}
       >
-        <CartProvider>
-          <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-        </CartProvider>
+        <QueryProvider>
+          <CartProvider>
+            <Navbar />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </CartProvider>
+        </QueryProvider>
       </body>
     </html>
   );
