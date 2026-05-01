@@ -23,7 +23,7 @@ export default function Home() {
       <section className="py-32 relative overflow-hidden">
         {/* Soft decorative background */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#f5e6c0]/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        
+         
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <motion.div
             initial="hidden"

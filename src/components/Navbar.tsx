@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,7 +19,32 @@ export default function Navbar() {
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+    router.refresh();
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -94,9 +120,37 @@ export default function Navbar() {
               Instagram
             </a>
 
+            {user ? (
+              <div className="relative group hidden md:block">
+                <button className="flex items-center gap-2 text-stone-600 hover:text-[#d4a84b] transition-colors py-2">
+                  <User size={20} strokeWidth={1.5} />
+                  <span className="text-sm font-medium">{user.name?.split(' ')[0] || user.email?.split('@')[0]}</span>
+                </button>
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white/90 backdrop-blur-xl border border-stone-200 rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 overflow-hidden">
+                  <div className="p-4 border-b border-stone-100">
+                    <p className="text-sm font-medium text-stone-800 truncate">{user.name || 'User'}</p>
+                    <p className="text-xs text-stone-500 truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="text-xs font-semibold tracking-widest uppercase text-stone-500 hover:text-[#d4a84b] transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
+
             <Link
               href="/cart"
-              className="relative text-stone-800 hover:text-[#d4a84b] transition-colors p-2 -mr-2 flex items-center gap-2"
+              className="relative text-yellow-800 hover:text-[#d4a84b] transition-colors p-2 -mr-2 flex items-center gap-2"
               aria-label="Cart"
             >
               <ShoppingBag size={22} strokeWidth={1.5} />
@@ -160,6 +214,40 @@ export default function Navbar() {
                     </Link>
                   </motion.div>
                 ))}
+                {user ? (
+                  <div className="mt-auto flex flex-col gap-4 pt-8">
+                    <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200 text-center">
+                      <p className="font-serif text-lg text-stone-800">{user.name}</p>
+                      <p className="text-sm text-stone-500">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileOpen(false);
+                      }}
+                      className="w-full py-4 text-center border border-red-200 text-red-600 rounded-2xl font-medium hover:bg-red-50 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-auto flex flex-col gap-4 pt-8">
+                    <Link
+                      href="/login"
+                      className="w-full py-4 text-center border border-stone-200 rounded-2xl text-stone-800 font-medium hover:bg-stone-50 transition-colors"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="w-full py-4 text-center bg-stone-900 text-white rounded-2xl font-medium hover:bg-stone-800 transition-colors shadow-lg shadow-stone-900/10"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Create Account
+                    </Link>
+                  </div>
+                )}
               </div>
 
               <div className="p-8 bg-white border-t border-stone-200/50">
