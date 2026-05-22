@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import api from "@/lib/api";
 
 const links = [
   { href: "/", label: "Home" },
@@ -18,7 +19,38 @@ export default function Navbar() {
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        if (pathname.startsWith('/admin')) return;
+        const token = localStorage.getItem("ether_token");
+        if (!token) {
+          setUser(null);
+          return;
+        }
+        const res = await api.get("/user/profile");
+        setUser(res.data.data);
+      } catch (err) {
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    localStorage.removeItem("ether_token");
+    localStorage.removeItem("ether_user");
+    localStorage.removeItem("ether_admin_token");
+    localStorage.removeItem("ether_admin_user");
+    setUser(null);
+    router.refresh();
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -28,6 +60,8 @@ export default function Navbar() {
 
   useEffect(() => setMobileOpen(false), [pathname]);
 
+  if (pathname.startsWith('/admin')) return null;
+
   return (
     <>
       <motion.nav
@@ -35,7 +69,7 @@ export default function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
-          ? "bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-4"
+          ? "bg-white/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-4"
           : "bg-transparent py-6"
           }`}
       >
@@ -94,9 +128,43 @@ export default function Navbar() {
               Instagram
             </a>
 
+            {user ? (
+              <div className="relative group hidden md:block">
+                <button className="flex items-center gap-2 text-stone-600 hover:text-[#d4a84b] transition-colors py-2">
+                  <User size={20} strokeWidth={1.5} />
+                  <span className="text-sm font-medium">{user.name?.split(' ')[0] || user.email?.split('@')[0]}</span>
+                </button>
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white/90 backdrop-blur-xl border border-stone-200 rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 overflow-hidden">
+                  <div className="p-4 border-b border-stone-100">
+                    <p className="text-sm font-medium text-stone-800 truncate">{user.name || 'User'}</p>
+                    <p className="text-xs text-stone-500 truncate">{user.email}</p>
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 transition-colors font-medium border-b border-stone-100"
+                  >
+                    Your Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="text-xs font-semibold tracking-widest uppercase text-stone-500 hover:text-[#d4a84b] transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
+
             <Link
               href="/cart"
-              className="relative text-stone-800 hover:text-[#d4a84b] transition-colors p-2 -mr-2 flex items-center gap-2"
+              className="relative text-yellow-800 hover:text-[#d4a84b] transition-colors p-2 -mr-2 flex items-center gap-2"
               aria-label="Cart"
             >
               <ShoppingBag size={22} strokeWidth={1.5} />
@@ -160,6 +228,47 @@ export default function Navbar() {
                     </Link>
                   </motion.div>
                 ))}
+                {user ? (
+                  <div className="mt-auto flex flex-col gap-4 pt-8">
+                    <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200 text-center">
+                      <p className="font-serif text-lg text-stone-800">{user.name}</p>
+                      <p className="text-sm text-stone-500">{user.email}</p>
+                    </div>
+                    <Link
+                      href="/profile"
+                      onClick={() => setMobileOpen(false)}
+                      className="w-full py-4 text-center border border-stone-200 text-stone-700 rounded-2xl font-medium hover:bg-stone-50 transition-colors"
+                    >
+                      Your Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileOpen(false);
+                      }}
+                      className="w-full py-4 text-center border border-red-200 text-red-600 rounded-2xl font-medium hover:bg-red-50 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-auto flex flex-col gap-4 pt-8">
+                    <Link
+                      href="/login"
+                      className="w-full py-4 text-center border border-stone-200 rounded-2xl text-stone-800 font-medium hover:bg-stone-50 transition-colors"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="w-full py-4 text-center bg-stone-900 text-white rounded-2xl font-medium hover:bg-stone-800 transition-colors shadow-lg shadow-stone-900/10"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Create Account
+                    </Link>
+                  </div>
+                )}
               </div>
 
               <div className="p-8 bg-white border-t border-stone-200/50">
