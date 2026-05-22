@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+
 import api from "@/lib/api";
 
 export default function LoginPage() {
@@ -16,7 +16,6 @@ export default function LoginPage() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,14 +29,22 @@ export default function LoginPage() {
       localStorage.setItem("ether_token", token);
       localStorage.setItem("ether_user", JSON.stringify(user));
 
-      router.push("/");
-      router.refresh();
+      if (user.role === 'admin') {
+        localStorage.setItem("ether_admin_token", token);
+        localStorage.setItem("ether_admin_user", JSON.stringify(user));
+        window.location.href = "/admin";
+      } else {
+        localStorage.removeItem("ether_admin_token");
+        localStorage.removeItem("ether_admin_user");
+        window.location.href = "/";
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-6 py-24">
@@ -146,12 +153,6 @@ export default function LoginPage() {
                 Create an account
               </Link>
             </p>
-            <Link 
-              href="/admin/login" 
-              className="inline-block mt-4 text-[10px] uppercase tracking-widest text-stone-400 hover:text-[#a07828] transition-colors font-bold"
-            >
-              — Admin Portal —
-            </Link>
           </div>
         </div>
       </motion.div>

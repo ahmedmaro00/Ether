@@ -4,18 +4,13 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 1080, 1200, 1920],
-  },
-  async rewrites() {
-    return [
+    remotePatterns: [
       {
-        source: '/api/auth/signup',
-        destination: 'http://localhost:3000/auth/register',
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
       },
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:3000/:path*',
-      },
-    ]
+    ],
   },
 };
 

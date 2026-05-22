@@ -61,7 +61,7 @@ export default function OrdersPage() {
   });
 
   const filteredOrders = orders?.filter((order: any) => {
-    const matchesSearch = order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = order.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           order._id?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -149,8 +149,8 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-8 py-6">
                       <div>
-                        <p className="font-semibold text-stone-800">{order.customerName}</p>
-                        <p className="text-stone-400 text-xs mt-0.5">{order.customerEmail || 'No email provided'}</p>
+                        <p className="font-semibold text-stone-800">{order.fullName}</p>
+                        <p className="text-stone-400 text-xs mt-0.5">{order.email || 'No email provided'}</p>
                       </div>
                     </td>
                     <td className="px-8 py-6">

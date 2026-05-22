@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Sidebar from '@/components/admin/Sidebar';
 import Navbar from '@/components/admin/Navbar';
@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -17,18 +16,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const user = JSON.parse(localStorage.getItem('ether_admin_user') || '{}');
 
     if (!token || user.role !== 'admin') {
-      if (pathname !== '/admin/login') {
-        router.push('/admin/login');
-      } else {
-        setIsAuthorized(true);
-      }
+      localStorage.removeItem('ether_admin_token');
+      localStorage.removeItem('ether_admin_user');
+      window.location.href = '/not-found';
     } else {
-      if (pathname === '/admin/login') {
-        router.push('/admin');
-      }
       setIsAuthorized(true);
     }
-  }, [pathname, router]);
+  }, [pathname]);
 
   if (isAuthorized === null) {
     return (
@@ -36,11 +30,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="w-12 h-12 border-4 border-[#d4a84b] border-t-transparent rounded-full animate-spin" />
       </div>
     );
-  }
-
-  // Login page doesn't get the sidebar/navbar
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
   }
 
   return (

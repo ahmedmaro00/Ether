@@ -33,7 +33,7 @@ api.interceptors.response.use(
         if (isAdminRoute) {
           localStorage.removeItem('ether_admin_token');
           localStorage.removeItem('ether_admin_user');
-          window.location.href = '/admin/login';
+          window.location.href = '/login';
         } else {
           localStorage.removeItem('ether_token');
           localStorage.removeItem('ether_user');

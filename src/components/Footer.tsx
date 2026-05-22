@@ -56,7 +56,7 @@ export default function Footer() {
               <li><Link href="/policy" className="hover:text-stone-200 transition-colors">Shipping & Returns</Link></li>
               <li><Link href="/policy" className="hover:text-stone-200 transition-colors">Our Story</Link></li>
               <li><Link href="/policy" className="hover:text-stone-200 transition-colors">Contact Us</Link></li>
-              <li><Link href="/admin/login" className="text-[#d4a84b]/80 hover:text-[#d4a84b] transition-colors font-medium">Staff Portal</Link></li>
+              <li><Link href="/login" className="text-[#d4a84b]/80 hover:text-[#d4a84b] transition-colors font-medium">Staff Portal</Link></li>
             </ul>
           </div>
         </div>

@@ -29,6 +29,11 @@ export default function Navbar() {
     const fetchUser = async () => {
       try {
         if (pathname.startsWith('/admin')) return;
+        const token = localStorage.getItem("ether_token");
+        if (!token) {
+          setUser(null);
+          return;
+        }
         const res = await api.get("/user/profile");
         setUser(res.data.data);
       } catch (err) {
@@ -41,6 +46,8 @@ export default function Navbar() {
   const handleLogout = async () => {
     localStorage.removeItem("ether_token");
     localStorage.removeItem("ether_user");
+    localStorage.removeItem("ether_admin_token");
+    localStorage.removeItem("ether_admin_user");
     setUser(null);
     router.refresh();
   };
@@ -62,7 +69,7 @@ export default function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
-          ? "bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-4"
+          ? "bg-white/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-4"
           : "bg-transparent py-6"
           }`}
       >

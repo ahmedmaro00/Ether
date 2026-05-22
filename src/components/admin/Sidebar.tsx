@@ -37,7 +37,7 @@ export default function Sidebar() {
   const handleLogout = () => {
     localStorage.removeItem('ether_admin_token');
     localStorage.removeItem('ether_admin_user');
-    window.location.href = '/admin/login';
+    window.location.href = '/login';
   };
 
   return (

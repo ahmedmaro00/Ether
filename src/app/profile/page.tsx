@@ -4,10 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { User, Mail, Save, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
 
 export default function ProfilePage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -16,9 +15,9 @@ export default function ProfilePage() {
   useEffect(() => {
     const token = localStorage.getItem('ether_token');
     if (!token) {
-      router.push('/login');
+      window.location.href = '/login';
     }
-  }, [router]);
+  }, []);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['user-profile'],
@@ -52,7 +51,9 @@ export default function ProfilePage() {
   const handleLogout = () => {
     localStorage.removeItem('ether_token');
     localStorage.removeItem('ether_user');
-    router.push('/login');
+    localStorage.removeItem("ether_admin_token");
+    localStorage.removeItem("ether_admin_user");
+    window.location.href = '/login';
   };
 
   if (isLoading) {

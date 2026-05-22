@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { notFound, useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import AddToCartButton from "@/components/AddToCartButton";
 import Link from "next/link";
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Loader2 } from 'lucide-react';
-import { useEffect } from "react";
+
 
 export default function ProductDetailsPage() {
   const params = useParams();

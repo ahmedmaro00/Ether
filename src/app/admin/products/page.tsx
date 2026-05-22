@@ -79,6 +79,9 @@ export default function ProductsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       closeModal();
+    },
+    onError: (err: any) => {
+      console.error(err);
     }
   });
 
@@ -445,6 +448,11 @@ export default function ProductsPage() {
                       )}
                     </div>
                   </div>
+                  {mutation.isError && (
+                    <div className="col-span-1 md:col-span-2 text-red-500 text-sm font-medium bg-red-50 p-4 rounded-xl border border-red-100">
+                      {(mutation.error as any).response?.data?.message || (mutation.error as any).message || 'An error occurred'}
+                    </div>
+                  )}
                 </form>
               </div>
 

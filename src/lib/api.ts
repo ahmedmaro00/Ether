@@ -30,16 +30,13 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
         const pathname = window.location.pathname;
-        const isAdminRoute = pathname.startsWith('/admin');
-        const isLoginPage = pathname === '/admin/login' || pathname === '/login';
+        const isLoginPage = pathname === '/login' || pathname === '/signup';
 
-        if (isAdminRoute && !isLoginPage) {
-          localStorage.removeItem('ether_admin_token');
-          localStorage.removeItem('ether_admin_user');
-          window.location.href = '/admin/login';
-        } else if (!isAdminRoute && !isLoginPage) {
+        if (!isLoginPage) {
           localStorage.removeItem('ether_token');
           localStorage.removeItem('ether_user');
+          localStorage.removeItem('ether_admin_token');
+          localStorage.removeItem('ether_admin_user');
           window.location.href = '/login';
         }
       }
