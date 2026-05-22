@@ -33,7 +33,7 @@ export default function NotFound() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="mb-6 -mt-12"
         >
-          <span className="font-serif text-2xl gold-gradient-text">Pure Earth.</span>
+          <span className="font-serif text-2xl gold-gradient-text">È T H E R</span>
         </motion.div>
 
         <motion.div

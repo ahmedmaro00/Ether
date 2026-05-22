@@ -10,7 +10,9 @@ import {
   TrendingUp, 
   ArrowUpRight,
   ArrowDownRight,
-  Loader2
+  Loader2,
+  Clock,
+  Check
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
@@ -62,6 +64,8 @@ export default function AdminDashboard() {
     { name: 'Sun', sales: 3490, orders: 22 },
   ];
 
+  const pendingOrdersCount = allOrders?.filter((o: any) => o.status?.toLowerCase() === 'pending')?.length || 0;
+
   const stats = [
     { 
       name: "Total Revenue", 
@@ -91,10 +95,10 @@ export default function AdminDashboard() {
       bg: "bg-purple-50"
     },
     { 
-      name: "Avg Order Value", 
-      value: orderStats?.totalOrders > 0 ? `$${(orderStats.totalRevenue / orderStats.totalOrders).toFixed(2)}` : '$0', 
-      icon: TrendingUp, 
-      trend: "-2.4%", 
+      name: "Pending Orders", 
+      value: pendingOrdersCount.toString(), 
+      icon: Clock, 
+      trend: "Action Needed", 
       isUp: false,
       color: "text-amber-600",
       bg: "bg-amber-50"
@@ -226,43 +230,55 @@ export default function AdminDashboard() {
           </div>
         </motion.div>
 
-        {/* Recent Orders Side Card */}
+        {/* Recent Activity Side Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
           transition={{ delay: 0.5 }} 
-          className="bg-white rounded-[2.5rem] border border-white shadow-[0_20px_60px_rgba(0,0,0,0.02)] p-8"
+          className="bg-white rounded-[2.5rem] border border-white shadow-[0_20px_60px_rgba(0,0,0,0.02)] p-8 relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-serif text-2xl text-stone-800">Recent Orders</h2>
-            <button className="text-[#a07828] text-xs font-bold uppercase tracking-widest hover:underline">View All</button>
+          <div className="absolute top-[-10%] right-[-10%] w-32 h-32 bg-[#d4a84b]/5 rounded-full blur-[20px]" />
+          <div className="flex items-center justify-between mb-8 relative z-10">
+            <h2 className="font-serif text-2xl text-stone-800">Recent Activity</h2>
+            <button className="text-[#a07828] text-xs font-bold uppercase tracking-widest hover:underline hover:text-[#d4a84b] transition-colors">View All</button>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-6 relative z-10">
             {allOrders?.slice(0, 5).map((order: any, idx: number) => (
-              <div key={order._id || idx} className="flex items-center justify-between group cursor-pointer">
+              <motion.div 
+                key={order._id || idx} 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 + idx * 0.1 }}
+                className="flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-2xl hover:bg-stone-50 transition-colors"
+              >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-stone-50 flex items-center justify-center text-stone-400 group-hover:bg-[#f5e6c0]/30 group-hover:text-[#d4a84b] transition-colors">
-                    <Package size={20} />
+                  <div className="w-12 h-12 rounded-xl bg-stone-50 flex items-center justify-center text-stone-400 group-hover:bg-gradient-to-br group-hover:from-[#f5e6c0] group-hover:to-[#d4a84b] group-hover:text-white transition-all duration-300 shadow-inner group-hover:shadow-md">
+                    {order.status?.toLowerCase() === 'delivered' ? <Check size={20} /> : <Clock size={20} />}
                   </div>
                   <div>
-                    <p className="font-semibold text-stone-800 text-sm group-hover:text-[#a07828] transition-colors">{order.fullName}</p>
-                    <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">#{order._id?.slice(-6).toUpperCase()}</p>
+                    <p className="font-semibold text-stone-800 text-sm group-hover:text-[#a07828] transition-colors">
+                      <span className="font-bold">{order.fullName}</span> placed an order
+                    </p>
+                    <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mt-0.5">#{order._id?.slice(-6).toUpperCase()}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-serif text-stone-800 text-sm">${order.totalPrice?.toFixed(2)}</p>
-                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
-                    order.status === 'delivered' ? 'bg-emerald-50 text-emerald-600' : 
-                    order.status === 'pending' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
+                  <p className="font-serif text-stone-800 text-sm group-hover:text-[#a07828] transition-colors">${order.totalPrice?.toFixed(2)}</p>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md mt-1 inline-block ${
+                    order.status?.toLowerCase() === 'delivered' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
+                    order.status?.toLowerCase() === 'pending' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
                   }`}>
-                    {order.status}
+                    {order.status || 'Pending'}
                   </span>
                 </div>
-              </div>
+              </motion.div>
             ))}
             {(!allOrders || allOrders.length === 0) && (
-              <p className="text-center text-stone-400 text-sm py-10 italic">No recent orders found</p>
+              <div className="text-center py-10">
+                <Clock className="mx-auto text-stone-200 mb-3" size={32} />
+                <p className="text-stone-400 text-sm italic">No recent activity found</p>
+              </div>
             )}
           </div>
         </motion.div>

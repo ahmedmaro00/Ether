@@ -14,10 +14,12 @@ import {
   Truck, 
   PackageCheck, 
   XCircle,
-  MoreHorizontal,
   ChevronLeft,
   ChevronRight,
-  ExternalLink
+  X,
+  MapPin,
+  Phone,
+  AtSign
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -41,6 +43,7 @@ export default function OrdersPage() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   // Fetch Orders
   const { data: orders, isLoading } = useQuery({
@@ -76,7 +79,10 @@ export default function OrdersPage() {
           <p className="text-stone-500 text-sm">Monitor sales and manage order processing workflows.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="bg-stone-50 text-stone-600 border border-stone-100 px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-100 transition-colors">
+          <button 
+            onClick={() => window.print()}
+            className="bg-stone-50 text-stone-600 border border-stone-100 px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-100 transition-colors"
+          >
             Print Invoices
           </button>
         </div>
@@ -180,14 +186,12 @@ export default function OrdersPage() {
                       <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">{order.products?.length || 0} items</p>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-stone-400 hover:text-[#a07828] hover:bg-[#f5e6c0]/20 rounded-lg transition-all">
-                          <Eye size={18} />
-                        </button>
-                        <button className="p-2 text-stone-300 hover:text-stone-800 rounded-lg transition-all">
-                          <MoreHorizontal size={18} />
-                        </button>
-                      </div>
+                      <button 
+                        onClick={() => setSelectedOrder(order)}
+                        className="p-2 text-stone-400 hover:text-[#a07828] hover:bg-[#f5e6c0]/20 rounded-lg transition-all"
+                      >
+                        <Eye size={18} />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -205,26 +209,76 @@ export default function OrdersPage() {
           </div>
         )}
 
-        {/* Pagination */}
-        <div className="px-8 py-6 border-t border-stone-50 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <p className="text-xs text-stone-400 font-medium uppercase tracking-widest">
-              Total Revenue: <span className="text-emerald-600 font-bold">${orders?.reduce((acc: number, o: any) => acc + (o.status !== 'cancelled' ? o.totalPrice : 0), 0).toFixed(2)}</span>
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="w-10 h-10 rounded-xl border border-stone-100 flex items-center justify-center text-stone-400 hover:bg-stone-50 transition-colors disabled:opacity-50" disabled>
-              <ChevronLeft size={20} />
-            </button>
-            <button className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-white shadow-lg shadow-stone-200">
-              1
-            </button>
-            <button className="w-10 h-10 rounded-xl border border-stone-100 flex items-center justify-center text-stone-400 hover:bg-stone-50 transition-colors disabled:opacity-50" disabled>
-              <ChevronRight size={20} />
-            </button>
+      </div>
+
+      {/* Order Detail Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onClick={() => setSelectedOrder(null)} />
+          <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden">
+            <div className="p-8 border-b border-stone-50 flex items-center justify-between">
+              <div>
+                <h2 className="font-serif text-2xl text-stone-800">Order Detail</h2>
+                <p className="text-xs text-stone-400 uppercase tracking-widest font-bold mt-1">#{selectedOrder._id?.slice(-6).toUpperCase()}</p>
+              </div>
+              <button onClick={() => setSelectedOrder(null)} className="w-10 h-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-400 hover:text-stone-800 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-8 space-y-5">
+              <div className="flex items-center gap-3">
+                <ShoppingCart size={18} className="text-stone-400" />
+                <div>
+                  <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Customer</p>
+                  <p className="text-stone-800 font-semibold">{selectedOrder.fullName}</p>
+                  <p className="text-stone-500 text-sm">{selectedOrder.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone size={18} className="text-stone-400" />
+                <div>
+                  <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Phone</p>
+                  <p className="text-stone-800">{selectedOrder.phone}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <AtSign size={18} className="text-stone-400" />
+                <div>
+                  <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Instagram</p>
+                  <p className="text-stone-800">@{selectedOrder.instagramUsername}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <MapPin size={18} className="text-stone-400" />
+                <div>
+                  <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Delivery Address</p>
+                  <p className="text-stone-800">{selectedOrder.address}</p>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-stone-50 flex items-center justify-between">
+                <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Total</p>
+                <p className="font-serif text-2xl text-stone-800">${selectedOrder.totalPrice?.toFixed(2)}</p>
+              </div>
+              <div className="pt-2">
+                <p className="text-xs text-stone-400 uppercase tracking-widest font-bold mb-3">Update Status</p>
+                <div className="flex flex-wrap gap-2">
+                  {['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => { updateStatusMutation.mutate({ id: selectedOrder._id, status: s }); setSelectedOrder({ ...selectedOrder, status: s }); }}
+                      className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg border transition-colors ${
+                        selectedOrder.status === s ? 'bg-[#f5e6c0] text-[#a07828] border-[#d4a84b]/30' : 'bg-stone-50 text-stone-500 border-stone-100 hover:bg-stone-100'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -57,7 +57,7 @@ export default function CheckoutPage() {
         fullName: form.fullName,
         email: form.email,
         phone: form.phone,
-        instagramUsername: form.instagram,
+        instagramUsername: form.instagram || "Not Provided",
         address: form.address,
         products: items.map((item) => ({ product: item.id, quantity: item.quantity })),
         totalPrice: total,
@@ -66,10 +66,20 @@ export default function CheckoutPage() {
       setOrderId(res.data.data._id);
       setStep("otp");
     } catch (err: any) {
-      let errorMessage = err.response?.data?.message || "Something went wrong creating your order.";
-      if (errorMessage.toLowerCase().includes("phone")) {
-        errorMessage = "Please enter valid phone";
+      const data = err.response?.data;
+      let errorMessage = data?.message || "Something went wrong creating your order.";
+      
+      if (data?.errors && Array.isArray(data.errors)) {
+        const phoneError = data.errors.find((e: any) => e.path?.includes("phone"));
+        if (phoneError) {
+          errorMessage = "Please enter a valid phone number (e.g., 2135557812).";
+        } else {
+          errorMessage = data.errors.map((e: any) => e.message).join(", ");
+        }
+      } else if (typeof errorMessage === "string" && errorMessage.toLowerCase().includes("phone")) {
+        errorMessage = "Please enter a valid phone number (e.g., 2135557812).";
       }
+      
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -108,6 +118,18 @@ export default function CheckoutPage() {
     setOtpLoading(true);
     try {
       await api.post(`/order/${orderId}/verify`, { otp: code });
+      
+      // Create notification for admin
+      try {
+        await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userName: form.fullName, orderId: orderId.slice(-6).toUpperCase() })
+        });
+      } catch (err) {
+        console.error("Failed to create notification", err);
+      }
+
       setOtpSuccess(true);
       clearCart();
       setTimeout(() => router.push("/success"), 1500);
@@ -222,9 +244,9 @@ export default function CheckoutPage() {
                           </div>
                           <div>
                             <label htmlFor="instagram" className="block text-xs font-semibold text-stone-500 uppercase tracking-widest mb-2 ml-1">
-                              Instagram Handle <span className="text-rose-400">*</span>
+                              Instagram Handle (Optional)
                             </label>
-                            <input type="text" id="instagram" required value={form.instagram} onChange={handleChange("instagram")} placeholder="@janedoe" className={inputClass} />
+                            <input type="text" id="instagram" value={form.instagram} onChange={handleChange("instagram")} placeholder="@janedoe" className={inputClass} />
                           </div>
                         </div>
                       </div>

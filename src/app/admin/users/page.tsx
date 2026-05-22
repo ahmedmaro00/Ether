@@ -45,7 +45,10 @@ export default function UsersPage() {
           <p className="text-stone-500 text-sm">View and manage all registered customers and administrators.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="bg-stone-900 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">
+          <button 
+            onClick={() => alert('Invite admin feature coming soon!')}
+            className="bg-stone-900 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200"
+          >
             Invite Admin
           </button>
         </div>
@@ -130,7 +133,10 @@ export default function UsersPage() {
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <button className="p-2 text-stone-400 hover:text-[#a07828] hover:bg-[#f5e6c0]/20 rounded-lg transition-all">
+                      <button 
+                        onClick={() => alert('User management options coming soon!')}
+                        className="p-2 text-stone-400 hover:text-[#a07828] hover:bg-[#f5e6c0]/20 rounded-lg transition-all"
+                      >
                         <MoreVertical size={20} />
                       </button>
                     </td>

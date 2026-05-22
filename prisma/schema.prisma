@@ -70,3 +70,12 @@ model OrderItem {
   quantity  Int
   price     Float
 }
+
+model Notification {
+  id        String   @id @default(uuid())
+  userName  String
+  orderId   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+

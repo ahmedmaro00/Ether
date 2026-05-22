@@ -131,6 +131,14 @@ export default function Navbar() {
                     <p className="text-sm font-medium text-stone-800 truncate">{user.name || 'User'}</p>
                     <p className="text-xs text-stone-500 truncate">{user.email}</p>
                   </div>
+                  {user.role === 'admin' && (
+                    <Link
+                      href="/admin"
+                      className="block w-full text-left px-4 py-3 text-sm text-[#a07828] font-semibold hover:bg-[#f5e6c0]/20 transition-colors border-b border-stone-100"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
@@ -220,6 +228,15 @@ export default function Navbar() {
                       <p className="font-serif text-lg text-stone-800">{user.name}</p>
                       <p className="text-sm text-stone-500">{user.email}</p>
                     </div>
+                    {user.role === 'admin' && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full py-4 text-center bg-[#d4a84b] text-white rounded-2xl font-medium hover:bg-[#a07828] transition-colors shadow-lg shadow-yellow-900/10"
+                      >
+                        Admin Dashboard
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         handleLogout();

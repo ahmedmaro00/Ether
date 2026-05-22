@@ -1,10 +1,14 @@
-const { PrismaClient } = require('@prisma/client');
-console.log(process.env.DATABASE_URL);
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || "file:./dev.db"
-    }
-  }
-});
-prisma.user.findMany().then(console.log).catch(console.error);
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const path = require('path');
+
+const dbPath = path.join(process.cwd(), 'dev.db');
+const url = 'file:' + dbPath.replace(/\\/g, '/');
+console.log('URL:', url);
+
+// Test the adapter directly
+const adapter = new PrismaBetterSqlite3({ url });
+console.log('Adapter created:', adapter.provider);
+adapter.connect().then(conn => {
+  console.log('Connected!');
+  conn.dispose();
+}).catch(e => console.log('Connect ERR:', e.message, e.stack));

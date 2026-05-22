@@ -172,7 +172,12 @@ export default function CategoriesPage() {
                 Deleting a category will unassign it from all products. Please handle with care.
               </p>
             </div>
-            <button className="text-xs font-bold uppercase tracking-widest text-[#a07828] hover:underline">Learn More</button>
+            <button 
+              onClick={() => alert('Categories are used to group products. Deleting a category does not delete the products inside it, but it will remove the association.')}
+              className="text-xs font-bold uppercase tracking-widest text-[#a07828] hover:underline"
+            >
+              Learn More
+            </button>
           </div>
         </div>
       </div>
