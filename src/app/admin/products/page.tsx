@@ -31,7 +31,7 @@ const productSchema = z.object({
   price: z.string().transform((val) => Number(val)),
   category: z.string().min(1, 'Category is required'),
   stock: z.string().transform((val) => Number(val)),
-  discount: z.string().transform((val) => Number(val)).optional().default('0'),
+  discount: z.string().transform((val) => Number(val)).optional().default(0),
 });
 
 type ProductForm = z.infer<typeof productSchema>;
