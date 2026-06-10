@@ -1,20 +1,16 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import path from 'path';
 
-const dbPath = path.join(process.cwd(), 'dev.db');
-
+// Singleton pattern to prevent multiple Prisma instances in dev (hot reload)
 const prismaClientSingleton = () => {
-  const adapter = new PrismaBetterSqlite3({ url: 'file:' + dbPath.replace(/\\/g, '/') });
-  return new PrismaClient({ adapter });
-}
+  return new PrismaClient();
+};
 
 declare const globalThis: {
   prismaGlobal: ReturnType<typeof prismaClientSingleton>;
 } & typeof global;
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
-export default prisma
+export default prisma;
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
