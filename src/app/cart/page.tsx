@@ -3,8 +3,60 @@
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
 import Image from "next/image";
-import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowRight, CreditCard, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import api from "@/lib/api";
+
+function QuantityControl({ item }: { item: any }) {
+  const { updateQuantity } = useCart();
+  const [stockError, setStockError] = useState(false);
+
+  const handleChange = async (val: number) => {
+    const qty = Math.max(1, val);
+    // Validate against live stock
+    try {
+      const res = await api.get(`/product/${item.id}`);
+      const stock: number = res.data?.data?.stock ?? Infinity;
+      if (qty > stock) {
+        setStockError(true);
+        setTimeout(() => setStockError(false), 3000);
+        return;
+      }
+    } catch {
+      // If we can't reach the API, proceed without validation
+    }
+    setStockError(false);
+    updateQuantity(item.id, qty);
+  };
+
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <div className="inline-flex items-center gap-3 bg-stone-50 border border-stone-100 rounded-full px-4 py-1.5 shadow-sm">
+        <span className="text-stone-600 text-xs font-semibold">${item.price}</span>
+        <span className="text-stone-200">|</span>
+        <label className="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Qty:</label>
+        <input
+          type="number"
+          min={1}
+          max={99}
+          value={item.quantity}
+          onChange={(e) => handleChange(parseInt(e.target.value) || 1)}
+          className="w-10 text-center text-stone-800 text-sm font-semibold focus:outline-none bg-transparent"
+        />
+      </div>
+      {stockError && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-rose-500 text-[10px] font-semibold flex items-center gap-1 ml-1"
+        >
+          <AlertCircle size={11} /> Requested quantity exceeds available stock.
+        </motion.p>
+      )}
+    </div>
+  );
+}
 
 export default function CartPage() {
   const { items, removeFromCart, total } = useCart();
@@ -86,18 +138,16 @@ export default function CartPage() {
                     {/* Info */}
                     <div className="flex-grow min-w-0 text-center sm:text-left">
                       <p className="font-serif text-xl text-stone-800 truncate mb-1">{item.name}</p>
-                      <p className="text-stone-400 text-sm font-light mb-2">{item.scent}</p>
-                      <div className="inline-flex items-center gap-3 bg-stone-100/50 rounded-full px-3 py-1 text-sm font-medium text-stone-600">
-                        <span>${item.price}</span>
-                        <span className="text-stone-300">×</span>
-                        <span>{item.quantity}</span>
-                      </div>
+                      <p className="text-stone-400 text-sm font-light mb-3">{item.scent}</p>
+                      
+                      {/* Quantity input controls with live stock validation */}
+                      <QuantityControl item={item} />
                     </div>
 
                     {/* Price + Delete */}
                     <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-4 flex-shrink-0 mt-4 sm:mt-0">
                       <p className="text-stone-800 font-medium text-xl">
-                        ${item.price * item.quantity}
+                        ${(item.price * item.quantity).toFixed(2)}
                       </p>
                       <button
                         onClick={() => removeFromCart(item.id)}
@@ -118,7 +168,7 @@ export default function CartPage() {
               {/* Payment Note */}
               <div className="flex items-start gap-4 bg-white border border-[#d4a84b]/20 rounded-2xl p-5 mb-8 shadow-sm">
                 <div className="w-10 h-10 rounded-full bg-[#f5e6c0]/30 flex items-center justify-center flex-shrink-0 text-[#d4a84b]">
-                  💳
+                  <CreditCard size={18} />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-stone-800 mb-1">Manual Payment via Zelle</h4>
@@ -132,7 +182,7 @@ export default function CartPage() {
               <div className="space-y-3 mb-8 px-2">
                 <div className="flex justify-between text-stone-500 text-base font-light">
                   <span>Subtotal ({items.reduce((a, i) => a + i.quantity, 0)} items)</span>
-                  <span className="font-medium text-stone-700">${total}</span>
+                  <span className="font-medium text-stone-700">${total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-stone-500 text-base font-light">
                   <span>Shipping</span>
@@ -140,7 +190,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between items-end pt-5 border-t border-stone-200 mt-2">
                   <span className="text-stone-500 text-sm font-medium uppercase tracking-widest">Estimated Total</span>
-                  <span className="text-3xl font-serif text-stone-900">${total}</span>
+                  <span className="text-3xl font-serif text-stone-900">${total.toFixed(2)}</span>
                 </div>
               </div>
 

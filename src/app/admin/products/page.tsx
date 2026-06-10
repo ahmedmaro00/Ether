@@ -34,7 +34,7 @@ const productSchema = z.object({
 discount: z.string().transform((val) => Number(val)).optional().default(0),
 });
 
-type ProductForm = z.infer<typeof productSchema>;
+type ProductForm = z.input<typeof productSchema>;
 
 export default function ProductsPage() {
   const queryClient = useQueryClient();
@@ -93,7 +93,7 @@ export default function ProductsPage() {
     }
   });
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<ProductForm>({
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<any>({
     resolver: zodResolver(productSchema)
   });
 
@@ -340,7 +340,7 @@ export default function ProductsPage() {
                         className="w-full bg-stone-50 border-stone-100 rounded-2xl py-3 px-4 text-sm focus:bg-white focus:border-[#d4a84b] outline-none transition-all"
                         placeholder="e.g. Lavender & Oakmoss Candle"
                       />
-                      {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+                      {errors.name && <p className="text-red-500 text-xs mt-1">{String(errors.name.message)}</p>}
                     </div>
 
                     <div>
@@ -351,7 +351,7 @@ export default function ProductsPage() {
                         className="w-full bg-stone-50 border-stone-100 rounded-2xl py-3 px-4 text-sm focus:bg-white focus:border-[#d4a84b] outline-none transition-all resize-none"
                         placeholder="Describe the scent profile, ingredients, and story..."
                       />
-                      {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+                      {errors.description && <p className="text-red-500 text-xs mt-1">{String(errors.description.message)}</p>}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -364,7 +364,7 @@ export default function ProductsPage() {
                           className="w-full bg-stone-50 border-stone-100 rounded-2xl py-3 px-4 text-sm focus:bg-white focus:border-[#d4a84b] outline-none transition-all"
                           placeholder="24.00"
                         />
-                        {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price.message}</p>}
+                        {errors.price && <p className="text-red-500 text-xs mt-1">{String(errors.price.message)}</p>}
                       </div>
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-stone-400 mb-2">Discount (%)</label>
@@ -386,7 +386,7 @@ export default function ProductsPage() {
                           className="w-full bg-stone-50 border-stone-100 rounded-2xl py-3 px-4 text-sm focus:bg-white focus:border-[#d4a84b] outline-none transition-all"
                           placeholder="50"
                         />
-                        {errors.stock && <p className="text-red-500 text-xs mt-1">{errors.stock.message}</p>}
+                        {errors.stock && <p className="text-red-500 text-xs mt-1">{String(errors.stock.message)}</p>}
                       </div>
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-stone-400 mb-2">Category</label>
@@ -399,7 +399,7 @@ export default function ProductsPage() {
                             <option key={cat._id} value={cat._id}>{cat.name}</option>
                           ))}
                         </select>
-                        {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
+                        {errors.category && <p className="text-red-500 text-xs mt-1">{String(errors.category.message)}</p>}
                       </div>
                     </div>
                   </div>

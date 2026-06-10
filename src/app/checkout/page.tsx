@@ -50,14 +50,33 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (items.length === 0) { setError("Your cart is empty."); return; }
+    if (!form.fullName || !form.email || !form.phone || !form.instagram) {
+      setError("Please fill out all mandatory fields.");
+      return;
+    }
     setIsSubmitting(true);
     setError("");
     try {
+      // ── Stock validation before placing order ───────────────────
+      for (const item of items) {
+        try {
+          const res = await api.get(`/product/${item.id}`);
+          const stock: number = res.data?.data?.stock ?? Infinity;
+          if (item.quantity > stock) {
+            setError("The requested quantity exceeds available stock. Please update your cart before proceeding.");
+            setIsSubmitting(false);
+            return;
+          }
+        } catch {
+          // If individual product lookup fails, let the server validate
+        }
+      }
+
       const payload = {
         fullName: form.fullName,
         email: form.email,
         phone: form.phone,
-        instagramUsername: form.instagram || "Not Provided",
+        instagramUsername: form.instagram,
         address: form.address,
         products: items.map((item) => ({ product: item.id, quantity: item.quantity })),
         totalPrice: total,
@@ -78,6 +97,8 @@ export default function CheckoutPage() {
         }
       } else if (typeof errorMessage === "string" && errorMessage.toLowerCase().includes("phone")) {
         errorMessage = "Please enter a valid phone number (e.g., 2135557812).";
+      } else if (typeof errorMessage === "string" && errorMessage.toLowerCase().includes("stock")) {
+        errorMessage = "The requested quantity exceeds available stock. Please update your cart before proceeding.";
       }
       
       setError(errorMessage);
@@ -118,6 +139,34 @@ export default function CheckoutPage() {
     setOtpLoading(true);
     try {
       await api.post(`/order/${orderId}/verify`, { otp: code });
+      
+      // Deduct product stock automatically on successful order verification
+      for (const item of items) {
+        try {
+          const prodRes = await api.get(`/product/${item.id}`);
+          const currentProduct = prodRes.data?.data;
+          if (currentProduct) {
+            const currentStock = typeof currentProduct.stock === 'number' ? currentProduct.stock : 0;
+            const newStock = Math.max(0, currentStock - item.quantity);
+            
+            const formData = new FormData();
+            formData.append("name", currentProduct.name);
+            formData.append("description", currentProduct.description);
+            formData.append("price", String(currentProduct.price));
+            formData.append("category", currentProduct.category?._id || currentProduct.category);
+            formData.append("stock", String(newStock));
+            if (currentProduct.discount !== undefined) {
+              formData.append("discount", String(currentProduct.discount));
+            }
+            
+            await api.patch(`/product/${item.id}`, formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            });
+          }
+        } catch (err) {
+          console.error("Failed to automatically deduct stock for product ID:", item.id, err);
+        }
+      }
       
       // Create notification for admin
       try {
@@ -224,7 +273,7 @@ export default function CheckoutPage() {
                       <div className="space-y-5">
                         <div>
                           <label htmlFor="fullName" className="block text-xs font-semibold text-stone-500 uppercase tracking-widest mb-2 ml-1">
-                            Full Name
+                            Full Name <span className="text-rose-400">*</span>
                           </label>
                           <input type="text" id="fullName" required value={form.fullName} onChange={handleChange("fullName")} placeholder="Jane Doe" className={inputClass} />
                         </div>
@@ -238,15 +287,15 @@ export default function CheckoutPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                           <div>
                             <label htmlFor="phone" className="block text-xs font-semibold text-stone-500 uppercase tracking-widest mb-2 ml-1">
-                              Phone Number
+                              Phone Number <span className="text-rose-400">*</span>
                             </label>
                             <input type="tel" id="phone" required value={form.phone} onChange={handleChange("phone")} placeholder="(555) 123-4567" className={inputClass} />
                           </div>
                           <div>
                             <label htmlFor="instagram" className="block text-xs font-semibold text-stone-500 uppercase tracking-widest mb-2 ml-1">
-                              Instagram Handle (Optional)
+                              Instagram Handle <span className="text-rose-400">*</span>
                             </label>
-                            <input type="text" id="instagram" value={form.instagram} onChange={handleChange("instagram")} placeholder="@janedoe" className={inputClass} />
+                            <input type="text" id="instagram" required value={form.instagram} onChange={handleChange("instagram")} placeholder="@janedoe" className={inputClass} />
                           </div>
                         </div>
                       </div>

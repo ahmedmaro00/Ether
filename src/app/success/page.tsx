@@ -4,6 +4,13 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { motion } from "framer-motion";
+import { Sparkles, Smartphone, CreditCard, Package, ExternalLink } from "lucide-react";
+
+const steps = [
+  { icon: Smartphone, title: "Watch for a DM", desc: "We'll message you on Instagram shortly." },
+  { icon: CreditCard, title: "Pay via Zelle", desc: "Secure manual payment after confirmation." },
+  { icon: Package, title: "Fast Shipping", desc: "Your order ships within 1–2 business days." },
+];
 
 export default function SuccessPage() {
   const circleRef = useRef<HTMLDivElement>(null);
@@ -32,7 +39,7 @@ export default function SuccessPage() {
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#d4a84b]/20 to-[#f5e6c0]/40 animate-ping opacity-30" style={{ animationDuration: '3s' }} />
           <div className="absolute inset-2 rounded-full border border-[#d4a84b]/30 animate-[spin_10s_linear_infinite]" />
           <div className="relative w-full h-full rounded-full bg-white border border-white shadow-[0_20px_40px_rgba(212,168,75,0.15)] flex items-center justify-center">
-            <span className="text-6xl drop-shadow-sm">✨</span>
+            <Sparkles className="text-[#d4a84b]" size={40} strokeWidth={1.5} />
           </div>
         </div>
 
@@ -54,18 +61,14 @@ export default function SuccessPage() {
             className="bg-white/80 backdrop-blur-md rounded-[2rem] border border-white shadow-[0_20px_60px_rgba(0,0,0,0.03)] p-8 md:p-10 mb-12 text-left max-w-lg mx-auto"
           >
             <div className="space-y-6">
-              {[
-                { icon: "📱", title: "Watch for a DM", desc: "We'll message you on Instagram shortly." },
-                { icon: "💳", title: "Pay via Zelle", desc: "Secure manual payment after confirmation." },
-                { icon: "📦", title: "Fast Shipping", desc: "Your order ships within 1–2 business days." },
-              ].map((step) => (
-                <div key={step.title} className="flex items-start gap-5">
-                  <div className="w-12 h-12 rounded-full bg-stone-50 flex items-center justify-center text-2xl flex-shrink-0 border border-stone-100 shadow-sm">
-                    {step.icon}
+              {steps.map(({ icon: Icon, title, desc }) => (
+                <div key={title} className="flex items-start gap-5">
+                  <div className="w-12 h-12 rounded-full bg-[#f5e6c0]/30 flex items-center justify-center flex-shrink-0 border border-[#d4a84b]/20 shadow-sm text-[#a07828]">
+                    <Icon size={20} strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h4 className="text-stone-800 font-medium mb-1">{step.title}</h4>
-                    <p className="text-stone-500 text-sm font-light">{step.desc}</p>
+                    <h4 className="text-stone-800 font-medium mb-1">{title}</h4>
+                    <p className="text-stone-500 text-sm font-light">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -85,6 +88,7 @@ export default function SuccessPage() {
               rel="noreferrer"
               className="bg-white border border-stone-200 text-stone-700 px-10 py-4.5 rounded-full font-medium hover:border-[#d4a84b] hover:text-[#d4a84b] transition-all shadow-sm flex items-center justify-center gap-2"
             >
+              <ExternalLink size={18} strokeWidth={1.5} />
               Open Instagram
             </a>
           </div>

@@ -11,7 +11,9 @@ import {
   Ticket, 
   Settings, 
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Film,
+  Star
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
@@ -26,6 +28,8 @@ const menuItems = [
   { label: 'Users', icon: Users, href: '/admin/users' },
   { label: 'Products', icon: Package, href: '/admin/products' },
   { label: 'Categories', icon: Tag, href: '/admin/categories' },
+  { label: 'Videos', icon: Film, href: '/admin/videos' },
+  { label: 'Reviews', icon: Star, href: '/admin/reviews' },
   { label: 'Orders', icon: ShoppingCart, href: '/admin/orders' },
   { label: 'Promo Codes', icon: Ticket, href: '/admin/promo-codes' },
   { label: 'Settings', icon: Settings, href: '/admin/settings' },

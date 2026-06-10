@@ -63,12 +63,18 @@ export default function OrdersPage() {
     }
   });
 
-  const filteredOrders = orders?.filter((order: any) => {
-    const matchesSearch = order.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          order._id?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredOrders = orders
+    ?.filter((order: any) => {
+      const matchesSearch =
+        order.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order._id?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 
   return (
     <div className="space-y-8">

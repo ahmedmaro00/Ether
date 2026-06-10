@@ -69,7 +69,7 @@ export default function PromoCodesPage() {
     }
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<PromoForm>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<any>({
     resolver: zodResolver(promoSchema)
   });
 
@@ -250,7 +250,7 @@ export default function PromoCodesPage() {
                     placeholder="ETHER20"
                     className="w-full bg-stone-50 border-stone-100 rounded-2xl py-3.5 px-4 text-sm font-mono tracking-widest focus:bg-white focus:border-[#d4a84b] outline-none transition-all uppercase"
                   />
-                  {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code.message}</p>}
+                  {errors.code && <p className="text-red-500 text-xs mt-1">{String(errors.code.message)}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -262,7 +262,7 @@ export default function PromoCodesPage() {
                       placeholder="20"
                       className="w-full bg-stone-50 border-stone-100 rounded-2xl py-3.5 px-4 text-sm focus:bg-white focus:border-[#d4a84b] outline-none transition-all"
                     />
-                    {errors.discount && <p className="text-red-500 text-xs mt-1">{errors.discount.message}</p>}
+                    {errors.discount && <p className="text-red-500 text-xs mt-1">{String(errors.discount.message)}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-widest text-stone-400 mb-2 ml-1">Usage Limit</label>
@@ -282,7 +282,7 @@ export default function PromoCodesPage() {
                     type="date"
                     className="w-full bg-stone-50 border-stone-100 rounded-2xl py-3.5 px-4 text-sm focus:bg-white focus:border-[#d4a84b] outline-none transition-all"
                   />
-                  {errors.expirationDate && <p className="text-red-500 text-xs mt-1">{errors.expirationDate.message}</p>}
+                  {errors.expirationDate && <p className="text-red-500 text-xs mt-1">{String(errors.expirationDate.message)}</p>}
                 </div>
 
                 <button 

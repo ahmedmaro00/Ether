@@ -112,7 +112,7 @@ export default function Navbar() {
           {/* Right actions */}
           <div className="flex items-center gap-6">
             <a
-              href="https://www.instagram.com/etheratelier2026?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+              href="https://www.instagram.com/etherbathandbody?igsh=Mm52eWI5anZxMmx5"
               target="_blank"
               rel="noreferrer"
               className="hidden md:flex items-center justify-center text-stone-500 hover:scale-110 transition"
@@ -270,7 +270,7 @@ export default function Navbar() {
               <div className="p-8 bg-white border-t border-stone-200/50">
                 <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-4">Follow Us</p>
                 <a
-                  href="https://www.instagram.com/etheratelier2026?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                  href="https://www.instagram.com/etherbathandbody?igsh=Mm52eWI5anZxMmx5"
                   target="_blank"
                   rel="noreferrer"
                   className="text-stone-800 hover:text-[#d4a84b] font-medium"
